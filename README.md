@@ -1,9 +1,9 @@
-﻿# Client Selection in Federated Learning
-Client Selection methods of Federated Learning implementations in PyTorch
+﻿# Active Client Selection for Communication-efficient Federated Learning
+Active Client Selection algorithms of Federated Learning implementations by PyTorch in my thesis
 
 ## Requirements
 ```shell
-torch
+torch=1.8.0
 torchvision
 numpy
 scipy
@@ -28,31 +28,31 @@ python main.py --method {client selection method you want}
 1. FederatedEMNIST (default)
     
     ```shell
-    python main.py --dataset FederatedEMNIST --model CNN -A 10 -K 3400 --lr_local 0.1 -B 20 -R 2000 
+    python src/main.py --dataset FederatedEMNIST --model CNN -A 10 -K 3400 --lr_local 0.1 -B 20 -R 2000 
    ```
 
 2. CelebA
    
    ```shell
-   python main.py --dataset CelebA --model CNN -A 10 -K 9343 --lr_local 0.005 -B 5 -R 100
+   python src/main.py --dataset CelebA --model CNN -A 10 -K 9343 --lr_local 0.005 -B 5 -R 100
    ```
 
 3. FederatedCIFAR100
     
    ```shell
-    python main.py --dataset FedCIFAR100 --model ResNet -A 10 -K 500 --lr_local 0.1 -B 20 -R 4000 
+    python src/main.py --dataset FedCIFAR100 --model ResNet -A 10 -K 500 --lr_local 0.1 -B 20 -R 4000 
    ```
 
 4. FederatedCIFAR10 (Partitioned by Dirichlet distribution, followed by Clustered Sampling) 
     
    ```shell
-    python main.py --dataset PartitionedCIFAR10 --model CNN -A 10 -K 100 --lr_local 0.1 -B 50 -R 1000 
+    python src/main.py --dataset PartitionedCIFAR10 --model CNN -A 10 -K 100 --lr_local 0.1 -B 50 -R 1000 
    ```
 
 5. Reddit
 
    ```shell
-    python main.py --dataset Reddit --model BLSTM -A 200 -K 7527 --maxlen 400 \
+    python src/main.py --dataset Reddit --model BLSTM -A 200 -K 7527 --maxlen 400 \
         --alpha1 0.75 --alpha2 0.01 --alpha3 0.1 \
         --lr_local 0.01 --lr_global 0.001 -E 2 -B 128 -R 100
    ```
