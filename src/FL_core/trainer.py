@@ -70,10 +70,7 @@ class Trainer:
         else:
             optimizer = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.wdecay)
 
-        if self.loss_threshold:
-            criterion = nn.CrossEntropyLoss(reduction='none')
-        else:
-            criterion = nn.CrossEntropyLoss()
+        criterion = nn.CrossEntropyLoss()
         
         for epoch in range(self.num_epoch):
             loss_lst = []
@@ -89,53 +86,22 @@ class Trainer:
 
                 loss = criterion(output, labels.long())
 
-                if self.loss_threshold:
-                    loss_batch = loss.detach()
-                    loss = torch.sum(loss) / loss.size(0)
-
                 loss.backward()
                 optimizer.step()
 
-                if self.probs:
-                    prob = F.softmax(output.detach().data, dim=1)
-                    uncertainties = prob.max(1)[0]
-                    probs += uncertainties.sum().cpu()
-                
-                if self.probs_all:
-                    prob = F.softmax(output.detach().data, dim=1)
-                    probs_sorted, _ = prob.sort(descending=True)
-                    uncertainties = probs_sorted[:, 0] - probs_sorted[:,1]
-                    probs += uncertainties.sum().cpu()
-
-                if self.loss_threshold:
-                    ot = loss_batch[loss_batch > self.ltr]
-                    num_ot += ot.size(0)
-                    train_loss += torch.sum(torch.square(ot)).cpu()
-                else:
-                    train_loss += loss.detach().item() * input.size(0)
-                
-                if self.use_score and epoch == self.num_epoch-1:
-                    output_lst = torch.cat((output_lst, output.detach()))
-                    res_lst = torch.cat((res_lst, F.one_hot(labels.long(), self.num_classes) - F.softmax(output.detach(), dim=1)))
+                train_loss += loss.detach().item() * input.size(0)
                 
                 correct += preds.eq(labels).sum().cpu().data.numpy()
                 total += input.size(0)
 
-                if self.misclf:
-                    score = preds.eq(labels).cpu().data + torch.ones(labels.size())
-                    loss_lst.extend(score.tolist())
-
+                
                 if self.num_updates is not None and num_update + 1 == self.num_updates:
                     if total < self.batch_size:
                         print(f'break! {total}', end=' ')
                     break
 
                 del input, labels, output
-
-                if self.loss_threshold:
-                    min_loss_batch = min(loss_batch)
-                    if min_loss_batch < min_loss: min_loss = min_loss_batch
-                    loss_lst.extend(loss_batch.tolist())
+                
 
         self.model = self.model.cpu()
 
@@ -143,8 +109,6 @@ class Trainer:
             
         result = {'loss': train_loss / total, 'acc': correct / total, 'metric': train_loss / total}
         
-        if self.probs or self.probs_all:
-            result['metric'] = probs / total
         
         # if you track each client's loss
         # sys.stdout.write(r'\nLoss {:.6f} Acc {:.4f}'.format(result['loss'], result['acc']))
@@ -240,10 +204,6 @@ class Trainer:
                     y_true = np.append(y_true, labels.detach().cpu().numpy(), axis=0)
                     y_score = np.append(y_score, preds.detach().cpu().numpy(), axis=0)
                 
-                if self.use_score and ema:
-                    output_lst = torch.cat((output_lst, output.detach().cpu().data))
-                    res_lst = torch.cat((res_lst, F.one_hot(labels.long().cpu(), self.num_classes) - F.softmax(output.detach().cpu().data, dim=1)))
-
                 del input, labels, output, preds
 
         assert total > 0
@@ -253,3 +213,5 @@ class Trainer:
         #if self.num_classes == 2:
         #    auc = roc_auc_score(y_true, y_score)
         #    result['auc'] = auc
+
+        return result

@@ -55,10 +55,7 @@ class Client(object):
             result['metric'] *= np.sqrt(len(self.labeled_data))  # loss * n_k / np.sqrt(n_k)
         elif self.loss_sum:
             result['metric'] *= len(self.labeled_data)  # total loss
-        elif self.use_score:
-            # result['metric']: model output and label
-            result['metric'] = self.compute_score(result['metric'])
-
+        
         return result
 
     def test(self, model, test_on_training_data=False):
