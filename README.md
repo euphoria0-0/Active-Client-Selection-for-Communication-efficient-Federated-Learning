@@ -54,7 +54,7 @@ python main.py --method {client selection method you want}
    Don't need to download any dataset.
     
    ```shell
-    python src/main.py --dataset PartitionedCIFAR10 --model CNN -A 10 -K 100 --lr_local 0.1 -B 50 -R 1000 
+    python src/main.py --dataset PartitionedCIFAR10 --model CNN -A 10 -K 100 --lr_local 0.001 -B 50 -R 1000 
    ```
 
 5. Reddit
